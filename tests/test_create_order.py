@@ -1,32 +1,26 @@
 import requests
 import allure
 import pytest
+from urls import CREATE_ORDER
+from data import HTTP_201_CREATED
 
 class TestCreateOrder:
 
-    @pytest.mark.parametrize("colors", [
-        ["BLACK"],
-        ["GREY"],
-        ["BLACK", "GREY"],
-        []
-    ])
-    def test_create_order_with_various_colors(self, colors):
+    @pytest.mark.parametrize("color", [["BLACK"], ["GREY"], ["BLACK", "GREY"], []])
+    def test_create_order_success(self, color):
         payload = {
             "firstName": "Test",
-            "lastName": "Courier",
-            "address": "Test street",
-            "metroStation": 4,
-            "phone": "+79999999999",
-            "rentTime": 2,
-            "deliveryDate": "2025-06-23",
-            "comment": "test comment",
-            "color": colors
+            "lastName": "User",
+            "address": "123 Test St",
+            "metroStation": "4",
+            "phone": "+70000000000",
+            "rentTime": 5,
+            "deliveryDate": "2025-06-30",
+            "comment": "Test order",
+            "color": color
         }
-        with allure.step(f"Создаём заказ с цветами: {colors}"):
-            response = requests.post(
-                'https://qa-scooter.praktikum-services.ru/api/v1/orders',
-                json=payload
-            )
-        with allure.step("Проверяем создание заказа"):
-            assert response.status_code == 201, f"Неверный статус при создании заказа {colors}"
-            assert "track" in response.json(), "Ответ не содержит track"
+        with allure.step("Создаём заказ с цветом: " + str(color)):
+            response = requests.post(CREATE_ORDER, json=payload)
+        with allure.step("Проверяем, что заказ создан"):
+            assert response.status_code == HTTP_201_CREATED
+            assert "track" in response.json()

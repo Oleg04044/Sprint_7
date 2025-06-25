@@ -1,30 +1,21 @@
-import requests
 import random
-import string
+import requests
+from urls import CREATE_COURIER, LOGIN_COURIER, DELETE_COURIER
 
 def register_new_courier_and_return_login_password():
-    def generate_random_string(length):
-        letters = string.ascii_lowercase
-        random_string = ''.join(random.choice(letters) for i in range(length))
-        return random_string
+    login = f"autotest_{random.randint(1000, 9999)}"
+    password = f"pass_{random.randint(1000, 9999)}"
+    first_name = f"TestName{random.randint(1000, 9999)}"
+    payload = {"login": login, "password": password, "firstName": first_name}
+    response = requests.post(CREATE_COURIER, json=payload)
+    return (login, password, first_name), response
 
-    login_pass = []
-
-    login = generate_random_string(10)
-    password = generate_random_string(10)
-    first_name = generate_random_string(10)
-
-    payload = {
+def get_courier_id(login, password):
+    response = requests.post(LOGIN_COURIER, json={
         "login": login,
-        "password": password,
-        "firstName": first_name
-    }
+        "password": password
+    })
+    return response.json().get("id")
 
-    response = requests.post('https://qa-scooter.praktikum-services.ru/api/v1/courier', data=payload)
-
-    if response.status_code == 201:
-        login_pass.append(login)
-        login_pass.append(password)
-        login_pass.append(first_name)
-
-    return login_pass, response
+def delete_courier(courier_id):
+    requests.delete(f"{DELETE_COURIER}/{courier_id}")
